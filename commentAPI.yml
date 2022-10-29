@@ -1,12 +1,17 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: 留言板API
   description: |-
     提供登入與登出功能，並提供查詢所有留言、使用者的所有留言及新增、編輯、刪除的功能，並可以抓取回覆的對應留言，也可對回覆的留言進行新增、編輯、刪除的功能。
   version: '1.0'
+
 tags:
   - name: Users
     description: 關於使用者登入、登出與註冊。
+  - name: Comments
+    description: 關於使用者留言的新增、刪除、修改、查看功能。
+  - name: Replies
+    description: 關於使用者回覆留言的新增、刪除、修改、查看功能。
 servers:
   - url: http://127.0.0.1:8000/api
 paths:
@@ -29,11 +34,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnMessage'
+                $ref: '#/components/schemas/MessageResponse'
               example:
                 success: false
                 message: The email has already been taken.
-
   /v1/login:
     post:
       tags:
@@ -53,11 +57,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnMessage'
+                $ref: '#/components/schemas/MessageResponse'
               example:
                 success: false
                 message: Unauthorized
-
   /v1/logout:
     post:
       tags:
@@ -71,11 +74,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnMessage'
+                $ref: '#/components/schemas/MessageResponse'
               example:
                 success: true
                 message: 'Successfully logged out'
-
   /v1/refreshToken:
     post:
       tags:
@@ -101,97 +103,344 @@ paths:
                     type: string
                     example: Unauthenticated.
 
+  /comments:
+    get:
+      tags:
+        - Comments
+      summary: 取得所有留言
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '500':
+          description: 取得失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Internal server error.
+    post:
+      tags:
+        - Comments
+      summary: 新增文章
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddComment'
+      responses:
+        '200':
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                message: Successfully create message!
+        '400':
+          description: 新增失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Unauthorized
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Internal Server Error
+  /comments/{comment}:
+    get:
+      tags:
+        - Comments
+      summary: 取得單一篇留言
+      parameters:
+        - name: comment
+          in: path
+          description: 這篇文章的ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功取得
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '404':
+          description: 找不到這篇留言
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Requested resource not found
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Internal Server Error
+    put:
+      tags:
+        - Comments
+      summary: 修改文章
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: comment
+          in: path
+          description: 這篇文章的ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/PutModifyComment'
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                message: Successfully update.
+        '400':
+          description: 修改失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Unauthorized
+        '404':
+          description: 找不到留言
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Requested resource not found
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Internal Server Error
+    delete:
+      tags:
+        - Comments
+      summary: 刪除文章
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: comment
+          in: path
+          description: 這篇文章的ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 刪除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                message: Successfully update.
+        '400':
+          description: 刪除失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Unauthorized
+        '404':
+          description: 找不到留言
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Requested resource not found
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Internal Server Error
+  /author/{user}/comments:
+    get:
+      tags:
+        - Comments
+      summary: 取得使用者所有的留言
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user
+          in: path
+          description: 使用者的ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功取得
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: 找不到這篇留言
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Requested resource not found
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Internal Server Error
+ 
+
+    
+
 components:
   schemas:
-    ReturnMessage:
+    MessageResponse:
       type: object
       properties:
         success: 
           type: string
         message: 
           type: string
-    Post:
+    Comment:
       type: object
       properties:
-        post_id: 
+        id: 
           type: string
           format: uuid
-        title:
+          example: 27565488-ab14-431d-93f9-867d7292578d
+        message:
           type: string
-        content:
-          type: string
+          example: Today is a nice day.
         created_at:
           type: string
           format: date-time
+          example: 2022-10-29 10:13:34
         updated_at:
           type: string
           format: date-time
+          example: 2022-10-29 10:13:34
         user:
           type: object
           properties:
-            user_id:
+            id:
               type: string
               format: uuid
+              example: 27565488-ab14-431d-93f9-867d7292578d
             name:
               type: string
+              example: Guest
     CommentPut:
       type: object
       properties:
         comment_id: 
           type: string
           format: uuid
+          example: 27565488-ab14-431d-93f9-867d7292578d
         message:
           type: string
+          example: Today is a nice day.
     User:
       type: object
       properties:
         user_id: 
           type: string
           format: uuid
-          example: '27565488-ab14-431d-93f9-867d7292578d'
+          example: 27565488-ab14-431d-93f9-867d7292578d
         name:
           type: string
-          example: Mary Zhong
-        comment:
+          example: Guest
+        messages:
           type: array
           items:
             type: object
             properties:
-              post_id:
+              id: 
                 type: string
                 format: uuid
-              title:
+                example: 27565488-ab14-431d-93f9-867d7292578d
+              message:
                 type: string
-              content:
-                type: string
+                example: Today is a nice day.
               created_at:
                 type: string
                 format: date-time
+                example: 2022-10-29 10:13:34
               updated_at:
                 type: string
                 format: date-time
+                example: 2022-10-29 10:13:34
     PostRequest:
-      type: object
-      properties:
-        title:
-          type: string
-        content:
-          type: string
-        user_id:
-          type: string
-          format: uuid
-    PutRequest:
-      type: object
-      properties:
-        title:
-          type: string
-        content:
-          type: string
-    GenericResponse:
       type: object
       properties:
         message:
           type: string
+          example: Today is a nice day.
+        user_id:
+          type: string
+          format: uuid
+          example: 27565488-ab14-431d-93f9-867d7292578d
+    PutRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          example: This is a wrong day.
     LoginRequest:
       type: object
       properties:
@@ -205,7 +454,7 @@ components:
       properties:
         name: 
           type: string
-          example: Mary Zhong
+          example: Guest
         email: 
           type: string
           example: test@example.com
@@ -242,7 +491,7 @@ components:
                   example: test@example.com
                 name:
                   type: string
-                  example: Mary Zhong
+                  example: Guest
         authorization:
           $ref: '#/components/schemas/Authorization'
     RefreshToken:
@@ -268,22 +517,15 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/LoginRequest'
-    AddPost:
-      description: Post object to be added
+    AddComment:
+      description: 新增留言
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/PostRequest'
-    ModifyPost:
-      description: Post object to be modified
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PostRequest'
-    PutModifyPost:
-      description: Post object to be modified
+    PutModifyComment:
+      description: 修改留言
       required: true
       content:
         application/json:
