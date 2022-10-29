@@ -21,11 +21,11 @@ class CommentController extends Controller
      */
     public function index()
     {
-        $Post = Comment::orderBy('created_at', 'desc')->get();
-        $post_arr = $Post->map(function ($item, $key) {
+        $comment = Comment::orderBy('created_at', 'desc')->get();
+        $comment_arr = $comment->map(function ($item, $key) {
             return new CommentDataResource($item);
         });
-        return response()->json($post_arr, 200);
+        return response()->json($comment_arr, 200);
     }
 
 
