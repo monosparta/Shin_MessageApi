@@ -6,12 +6,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class AuthResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-     */
     public function toArray($request)
     {
         return [
@@ -20,15 +14,9 @@ class AuthResource extends JsonResource
                 'user' => [
                     'id' => $this['user']->id,
                     'email' => $this['user']->email,
-                    'username' => $this['user']->username,
+                    'name' => $this['user']->name,
                 ],
-                'token' => [
-                    'token_type' => 'Bearer',
-                    'access_token' => $this['access_token']->plainTextToken,
-                    'access_token_expires_at' => $this['access_token']->accessToken->expires_at,
-                    'refresh_token' => $this['refresh_token']->plainTextToken,
-                    'refresh_token_expires_at' => $this['refresh_token']->accessToken->expires_at,
-                ],
+                'authorization' => $this['authorization'],
             ],
         ];
     }

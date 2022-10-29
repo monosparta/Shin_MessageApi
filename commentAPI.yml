@@ -1,0 +1,295 @@
+openapi: "3.0.3"
+info:
+  title: 留言板API
+  description: |-
+    提供登入與登出功能，並提供查詢所有留言、使用者的所有留言及新增、編輯、刪除的功能，並可以抓取回覆的對應留言，也可對回覆的留言進行新增、編輯、刪除的功能。
+  version: '1.0'
+tags:
+  - name: Users
+    description: 關於使用者登入、登出與註冊。
+servers:
+  - url: http://127.0.0.1:8000/api
+paths:
+  /v1/register:
+    post:
+      tags:
+        - Users
+      summary: 使用者註冊帳號
+      requestBody:
+        $ref: '#/components/requestBodies/Register'
+      responses:
+        '200':
+          description: 註冊成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: 註冊失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnMessage'
+              example:
+                success: false
+                message: The email has already been taken.
+
+  /v1/login:
+    post:
+      tags:
+        - Users
+      summary: 使用者登入
+      requestBody:
+        $ref: '#/components/requestBodies/Login'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: 註冊失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnMessage'
+              example:
+                success: false
+                message: Unauthorized
+
+  /v1/logout:
+    post:
+      tags:
+        - Users
+      summary: 使用者登出
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnMessage'
+              example:
+                success: true
+                message: 'Successfully logged out'
+
+  /v1/refreshToken:
+    post:
+      tags:
+        - Users
+      summary: Token刷新
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 成功刷新
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshToken'
+        '401':
+          description: 刷新失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: Unauthenticated.
+
+components:
+  schemas:
+    ReturnMessage:
+      type: object
+      properties:
+        success: 
+          type: string
+        message: 
+          type: string
+    Post:
+      type: object
+      properties:
+        post_id: 
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        user:
+          type: object
+          properties:
+            user_id:
+              type: string
+              format: uuid
+            name:
+              type: string
+    CommentPut:
+      type: object
+      properties:
+        comment_id: 
+          type: string
+          format: uuid
+        message:
+          type: string
+    User:
+      type: object
+      properties:
+        user_id: 
+          type: string
+          format: uuid
+          example: '27565488-ab14-431d-93f9-867d7292578d'
+        name:
+          type: string
+          example: Mary Zhong
+        comment:
+          type: array
+          items:
+            type: object
+            properties:
+              post_id:
+                type: string
+                format: uuid
+              title:
+                type: string
+              content:
+                type: string
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+    PostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        user_id:
+          type: string
+          format: uuid
+    PutRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+    GenericResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        email: 
+          type: string
+          example: test@example.com
+        password:
+          type: string
+    RegisterRequest:
+      type: object
+      properties:
+        name: 
+          type: string
+          example: Mary Zhong
+        email: 
+          type: string
+          example: test@example.com
+        password: 
+          type: string
+        password_confirmation:
+          type: string
+    Authorization:
+      type: object
+      properties:
+        type: 
+          type: string
+          example: bearer
+        token: 
+          type: string
+          example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDEvYXBpL3YxL2xvZ2luIiwiaWF0IjoxNjY2OTUwNDExLCJleHAiOjE2NjY5NTQwMTEsIm5iZiI6MTY2Njk1MDQxMSwianRpIjoidUFhQ2VWSzRObkEwV2s2SCIsInN1YiI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.paFCi8Kkn1W1IPkkhuMfnaFxJEhq5VSitAUdOv7pvdc'
+    LoginResponse:
+      type: object
+      properties:
+        message: 
+          type: string
+          example: success
+        data: 
+          type: object
+          properties:
+            user: 
+              type: object
+              properties:
+                id: 
+                  type: string
+                  example: 27565488-ab14-431d-93f9-867d7292578d
+                email: 
+                  type: string
+                  example: test@example.com
+                name:
+                  type: string
+                  example: Mary Zhong
+        authorization:
+          $ref: '#/components/schemas/Authorization'
+    RefreshToken:
+        type: object
+        properties:
+          message:
+            type: string
+            example: success
+          authorization:
+            $ref: '#/components/schemas/Authorization'
+  requestBodies:
+    Register:
+      description: 註冊你的帳號密碼
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterRequest'
+    Login:
+      description: 輸入你的帳號(email)、密碼(password)
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+    AddPost:
+      description: Post object to be added
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostRequest'
+    ModifyPost:
+      description: Post object to be modified
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostRequest'
+    PutModifyPost:
+      description: Post object to be modified
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PutRequest'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
