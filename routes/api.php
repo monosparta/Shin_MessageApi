@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\V1\AuthController;
+use App\Http\Controllers\ReplyController;
 
 
 /*
@@ -36,11 +37,15 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/comments', [CommentController::class, 'store']);  /* C */
     Route::put('/comments/{comment}', [CommentController::class, 'update']);  /* U */
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);  /* D */
+
+    //回覆
+    Route::get('/comments/{comment}/replies', [ReplyController::class, 'show']);  /* R */
+    Route::put('/replies/{reply}', [ReplyController::class, 'update']);  /* U */
+    Route::delete('/replies/{reply}', [ReplyController::class, 'destroy']);  /* D */
 });
 
+//留言（不需要認證）
 Route::get('/comments', [CommentController::class, 'index']);
+Route::post('/replies', [ReplyController::class, 'store']);  /* C */
 Route::get('/comments/{comment}', [CommentController::class, 'show']);  /* R */
 Route::get('/author/{user}/comments', [CommentController::class, 'getUserComments']);  /* R */
-
-//回覆留言的訊息
-Route::get('/replies/{comment}', [CommentController::class, 'index']);

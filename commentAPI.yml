@@ -123,7 +123,7 @@ paths:
     post:
       tags:
         - Comments
-      summary: 新增文章
+      summary: 新增留言
       security:
         - bearerAuth: []
       requestBody:
@@ -150,7 +150,7 @@ paths:
       parameters:
         - name: comment
           in: path
-          description: 這篇文章的ID
+          description: 留言的ID
           required: true
           schema:
             type: string
@@ -169,13 +169,13 @@ paths:
     put:
       tags:
         - Comments
-      summary: 修改文章
+      summary: 修改留言
       security:
         - bearerAuth: []
       parameters:
         - name: comment
           in: path
-          description: 這篇文章的ID
+          description: 留言的ID
           required: true
           schema:
             type: string
@@ -201,13 +201,13 @@ paths:
     delete:
       tags:
         - Comments
-      summary: 刪除文章
+      summary: 刪除留言
       security:
         - bearerAuth: []
       parameters:
         - name: comment
           in: path
-          description: 這篇文章的ID
+          description: 使用者要回覆那一篇留言的ID
           required: true
           schema:
             type: string
@@ -259,7 +259,133 @@ paths:
                 message: Requested resource not found
         '500':
           $ref: '#/components/responses/500'
- 
+  /comments/{comment}/replies:
+    get:
+      tags:
+        - Replies
+      summary: 取得留言{comment}的所有回覆
+      parameters:
+        - name: comment
+          in: path
+          description: 留言的ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment_id:
+                    type: string
+                    format: uuid
+                  replies:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '404':
+          description: 找不到這位作者
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: false
+                message: Requested resource not found
+        '500':
+          $ref: '#/components/responses/500'
+  /replies:
+    post:
+      tags:
+        - Replies
+      summary: 新增回覆的留言
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/AddReply'
+      responses:
+        '200':
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                message: Successfully reply message!
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  /replies/{reply}:
+    put:
+      tags:
+        - Replies
+      summary: 修改回覆的留言
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reply
+          in: path
+          description: 使用者要回覆那一篇留言的ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/PutModifyComment'
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                message: Successfully update.
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Replies
+      summary: 刪除回覆的留言
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reply
+          in: path
+          description: 使用者要回覆那一篇留言的ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 刪除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                message: Successfully delete.
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
 
     
 
@@ -346,6 +472,20 @@ components:
         message:
           type: string
           example: Today is a nice day.
+        user_id:
+          type: string
+          format: uuid
+          example: 27565488-ab14-431d-93f9-867d7292578d
+    ReplyPostRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Today is a nice day.
+        comment_id:
+          type: string
+          format: uuid
+          example: 27565488-ab14-431d-93f9-867d7292578d
         user_id:
           type: string
           format: uuid
@@ -439,6 +579,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PostRequest'
+    AddReply:
+      description: 新增回覆
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReplyPostRequest'
     PutModifyComment:
       description: 修改留言
       required: true

@@ -16,7 +16,7 @@ class Reply extends Model
     protected $fillable = [
         'user_id',
         'message',
-        'parent_id',
+        'comment_id',
     ];
     protected function createdAt(): Attribute
     {

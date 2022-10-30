@@ -1,47 +1,66 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Reply;
+use App\Models\Comment;
+use App\Models\User;
+use Illuminate\Http\Request;
+use App\Http\Requests\StoreReplyRequest;
+use App\Http\Requests\UpdateReplyRequest;
+use App\Http\Resources\CommentRepliesResource;
+use Illuminate\Validation\ValidationException;
+
+class ReplyController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-    $Post = Comment::orderBy('created_at', 'desc')->get();
-    $post_arr = $Post->map(function ($item, $key) {
-    return new CommentDataResource($item);
-    });
-    return response()->json($post_arr, 200);
     }
-
 
     public function store(Request $request)
     {
-    try {
-    $validResult = $request->validate([
-    "message" => "required|string",
-    'user_id' => 'required|uuid'
-    ]);
-    $comment = Comment::create($request->all());
-    return response()->json(['message' => "Successfully create message!"], 201);
-    } catch (ValidationException $exception) {
-    $errorComment =
-    $exception->validator->getMessageBag()->getMessages();
-    return response()->json(['message' => $errorComment], 400);
-    }
-    }
-    public function show(Comment $comment)
-    {
-    return response()->json(new CommentDataResource($comment), 200);
+        // return $request;
+        try {
+            $validResult = $request->validate([
+                "message" => "required|string",
+                'comment_id' => 'required|uuid',
+                'user_id' => 'required|uuid'
+            ]);
+            $comment = Reply::create($request->all());
+            return response()->json(['success' => true, 'message' => "Successfully reply message!"], 201);
+        } catch (ValidationException $exception) {
+            $errorReply =
+                $exception->validator->getMessageBag()->getMessages();
+            return response()->json(['message' => $errorReply], 400);
+        }
     }
 
-    public function update(Request $request, Comment $comment)
+    public function show(Request $request, Comment $comment)
     {
-    $comment->update($request->all());
-    return response()->json([
-    'message' => 'successful update'
-    ], 200);
+        // return $comment;
+        return response()->json(new CommentRepliesResource($comment), 200);
     }
 
-    public function destroy(Comment $comment)
+    public function update(Request $request, Reply $reply)
     {
-    $comment->delete();
+        $reply->update($request->all());
+        return response()->json([
+            'success' => true,
+            'message' => 'Successfully update.'
+        ], 200);
     }
-    public function getUserComments(Request $request, User $user)
+
+    public function destroy(Reply $reply)
     {
-    return response()->json(new AuthorCommentsResource($user));
+        $reply->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Successfully delete.'
+        ], 200);
     }
-    }
+}
