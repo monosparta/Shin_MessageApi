@@ -15,13 +15,13 @@ class MessageSeeder extends Seeder
      */
     public function run()
     {
-        Message::factory()->create([
-            'id' => 'ffffffff-ffff-ffff-ffff-ffffffffffff'
-        ]);
+        // Message::factory()->create([
+        //     'id' => 'ffffffff-ffff-ffff-ffff-ffffffffffff'
+        // ]);
 
-        Message::factory()->create([
-            'id' => '00000000-0000-0000-0000-000000000000'
-        ]);
-        Message::factory(10)->create();
+        // Message::factory()->create([
+        //     'id' => '00000000-0000-0000-0000-000000000000'
+        // ]);
+        // Message::factory(10)->create();
     }
 }

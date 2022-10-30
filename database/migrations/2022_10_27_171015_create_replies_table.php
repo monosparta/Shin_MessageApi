@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('replies', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('parent_id');
-            $table->foreign('parent_id')->references('id')->on('comments');
+            $table->string('comment_id');
+            $table->foreign('comment_id')->references('id')->on('comments');
             $table->string('message', 500);
             $table->string('user_id');
             $table->foreign('user_id')->references('id')->on('users');
