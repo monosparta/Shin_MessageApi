@@ -58,7 +58,7 @@ class CommentController extends Controller
                     'success' => false,
                     'message' => $error_comment
                 ],
-                400
+                500
             );
         }
     }

@@ -31,12 +31,15 @@ Route::prefix('v1')->group(function () {
     // Route::get('/getCSRFToken', [AuthController::class, 'getCSRFToken']);
 });
 
-//留言
+Route::middleware('auth:api')->group(function () {
+    //留言
+    Route::post('/comments', [CommentController::class, 'store']);  /* C */
+    Route::put('/comments/{comment}', [CommentController::class, 'update']);  /* U */
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);  /* D */
+});
+
 Route::get('/comments', [CommentController::class, 'index']);
-Route::post('/comments', [CommentController::class, 'store']);  /* C */
 Route::get('/comments/{comment}', [CommentController::class, 'show']);  /* R */
-Route::put('/comments/{comment}', [CommentController::class, 'update']);  /* U */
-Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);  /* D */
 Route::get('/author/{user}/comments', [CommentController::class, 'getUserComments']);  /* R */
 
 //回覆留言的訊息
