@@ -21,11 +21,23 @@ class CommentController extends Controller
      */
     public function index()
     {
-        $comment = Comment::orderBy('created_at', 'desc')->get();
-        $comment_arr = $comment->map(function ($item, $key) {
-            return new CommentDataResource($item);
-        });
-        return response()->json($comment_arr, 200);
+        try {
+            $comment = Comment::orderBy('created_at', 'desc')->get();
+            $comment_arr = $comment->map(function ($item, $key) {
+                return new CommentDataResource($item);
+            });
+            return response()->json($comment_arr, 200);
+        } catch (ValidationException $exception) {
+            $error_comment =
+                $exception->validator->getMessageBag()->getMessages();
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => $error_comment
+                ],
+                500
+            );
+        }
     }
 
 
@@ -37,11 +49,17 @@ class CommentController extends Controller
                 'user_id' => 'required|uuid'
             ]);
             $comment = Comment::create($request->all());
-            return response()->json(['message' => "Successfully create message!"], 201);
+            return response()->json(['success' => true, 'message' => "Successfully create message!"], 201);
         } catch (ValidationException $exception) {
-            $errorComment =
+            $error_comment =
                 $exception->validator->getMessageBag()->getMessages();
-            return response()->json(['message' => $errorComment], 400);
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => $error_comment
+                ],
+                500
+            );
         }
     }
     public function show(Comment $comment)
@@ -53,14 +71,18 @@ class CommentController extends Controller
     {
         $comment->update($request->all());
         return response()->json([
-            'message' => 'successful update'
+            'success' => true,
+            'message' => 'Successfully update.'
         ], 200);
     }
 
     public function destroy(Comment $comment)
     {
         $comment->delete();
-        return response()->json(null, 204);
+        return response()->json([
+            'success' => true,
+            'message' => 'Successfully delete.'
+        ], 200);
     }
     public function getUserComments(Request $request, User $user)
     {

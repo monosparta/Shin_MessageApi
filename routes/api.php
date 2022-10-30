@@ -28,22 +28,18 @@ Route::prefix('v1')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refreshToken', [AuthController::class, 'refreshToken']);
-    Route::get('/getCSRFToken', [AuthController::class, 'getCSRFToken']);
+    // Route::get('/getCSRFToken', [AuthController::class, 'getCSRFToken']);
 });
 
-// Route::get('/getCSRFToken', [HomeController::class, 'getCSRFToken']);
-Route::get('/token', function (Request $request) {
-    $token = $request->session()->token();
-    $token = csrf_token();
-    return $token;
+Route::middleware('auth:api')->group(function () {
+    //留言
+    Route::post('/comments', [CommentController::class, 'store']);  /* C */
+    Route::put('/comments/{comment}', [CommentController::class, 'update']);  /* U */
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);  /* D */
 });
 
-//留言
 Route::get('/comments', [CommentController::class, 'index']);
-Route::post('/comment', [CommentController::class, 'store']);  /* C */
 Route::get('/comments/{comment}', [CommentController::class, 'show']);  /* R */
-Route::put('/comments/{comment}', [CommentController::class, 'update']);  /* U */
-Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);  /* D */
 Route::get('/author/{user}/comments', [CommentController::class, 'getUserComments']);  /* R */
 
 //回覆留言的訊息

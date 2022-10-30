@@ -17,7 +17,7 @@ class AuthorCommentsResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'messages' => CommentResource::collection($this->messages->sortByDesc('created_at'))
+            'messages' => CommentResource::collection($this->comments->sortByDesc('created_at'))
         ];
     }
 }
